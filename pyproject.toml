@@ -1,22 +1,22 @@
-[project]
+[tool.poetry]
 name = "fast-api-supabase-boilerplate"
 version = "0.1.0"
 description = "A FastAPI boilerplate with Supabase integration"
 authors = []
+package-mode = false
 
-requires-python = ">=3.9,<4.0"
-dependencies = [
-    "fastapi[standard]",
-    "supabase",
-    "pydantic",
-    "pydantic-settings",
-    "python-dotenv",
-]
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = { extras = ["standard"], version = "*" }
+supabase = "*"
+pydantic = "*"
+pydantic-settings = "*"
+python-dotenv = "*"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-asyncio = "*"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio"]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
