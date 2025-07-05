@@ -42,6 +42,5 @@ async def readiness_check():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "checks": {
             "database": "connected",  # This would be a real check
-            "cache": "available"      # This would be a real check
         }
     } 
