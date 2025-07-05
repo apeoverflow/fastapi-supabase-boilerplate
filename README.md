@@ -274,16 +274,27 @@ CMD ["python", "run.py"]
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📈 Key Improvements
+## 📈 Architecture & Design Decisions
 
-This boilerplate includes several production-ready improvements:
+This boilerplate incorporates several production-ready architectural patterns and optimizations:
 
-1. **✅ Proper Async Support** - Real async with thread pool execution
-2. **✅ Centralized Logging** - Structured logging with request tracing
-3. **✅ Flexible Filtering** - Multiple operators and advanced search
-4. **✅ Consistent Returns** - Standardized response format
-5. **✅ Database Pagination** - Efficient data retrieval
-6. **✅ Dependency Injection** - Clean, testable architecture
+### **Proper Async Support**
+Many FastAPI applications claim to be async but still block the event loop with synchronous database operations. This boilerplate implements true async patterns by using thread pool executors for Supabase operations. When you make a database call, it runs in a separate thread, allowing the main event loop to handle other requests concurrently. This dramatically improves performance under load, especially for I/O-bound operations like database queries.
+
+### **Centralized Logging with Request Tracing**
+Rather than scattered print statements, this boilerplate implements structured logging with contextual information. Each request gets a unique request ID that's traced through the entire request lifecycle - from the initial HTTP request, through middleware, controllers, services, and any errors. This makes debugging distributed systems much easier, as you can trace exactly what happened during a specific request by searching logs for the request ID.
+
+### **Flexible Filtering System**
+Instead of basic string matching, the search system supports multiple operators (`ilike` for case-insensitive partial matches, `gte`/`lte` for range queries, etc.). This allows for sophisticated search capabilities like "find items with prices between $10-$50" or "find items whose names contain 'coffee' (case-insensitive)". The filtering logic is centralized in the service layer, making it reusable and testable.
+
+### **Consistent API Response Format**
+All endpoints return responses in a standardized format with consistent fields like `data`, `message`, `request_id`, and `timestamp`. This eliminates the guesswork for frontend developers and API consumers - they always know what structure to expect. Error responses follow the same pattern, making error handling predictable and uniform across the entire API.
+
+### **Database-Level Pagination**
+Rather than loading all records into memory and then slicing them (which is memory-intensive and slow), pagination is handled at the database level using `LIMIT` and `OFFSET` clauses. This means whether you're paginating through 100 items or 1 million items, the performance remains consistent and memory usage stays low.
+
+### **Dependency Injection Architecture**
+The application uses FastAPI's built-in dependency injection system to provide clean separation of concerns. Database connections, services, and other dependencies are injected into route handlers rather than being imported directly. This makes the code more testable (you can easily mock dependencies), more maintainable (changing a service implementation doesn't require updating every controller), and follows SOLID principles for better software design.
 
 ## 📄 License
 
