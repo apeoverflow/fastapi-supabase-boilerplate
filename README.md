@@ -40,11 +40,14 @@ cd fast-api-playground
 
 ### 2. Install Dependencies
 ```bash
-# With Poetry (recommended)
+# If you have Poetry available
 poetry install
 
-# Or with pip
+# Or with pip using existing requirements
 pip install -r requirements.txt
+
+# Or using conda/mamba (if that's your setup)
+conda install --file requirements.txt
 ```
 
 ### 3. Environment Configuration
@@ -64,14 +67,17 @@ cp .env.example .env
 
 ### 5. Run the Application
 ```bash
-# Option 1: Using the enhanced startup script
+# If you have Poetry available (as you're using)
+poetry run python run.py
+
+# Or direct Python execution
 python run.py
 
-# Option 2: Direct FastAPI
-python main.py
-
-# Option 3: Using uvicorn directly
+# Or using uvicorn directly
 uvicorn main:app --reload
+
+# Enhanced startup with environment control
+python run.py
 ```
 
 ### 6. Explore the API
@@ -153,7 +159,9 @@ curl "http://localhost:8000/api/v1/items/search/price-range/?min_price=10&max_pr
 ├── main.py             # FastAPI application
 ├── run.py              # Enhanced startup script
 ├── setup_db.sql        # Database schema
-└── requirements.txt    # Dependencies
+├── pyproject.toml      # Poetry dependencies & config
+├── poetry.lock         # Locked dependency versions
+└── .env.example        # Environment variables template
 ```
 
 ## 🔧 Configuration
@@ -190,20 +198,72 @@ Visit the interactive API documentation at `http://localhost:8000/docs` to test 
 
 ### Environment Setup
 1. Set `RELOAD=false` in production
-2. Configure proper logging levels
+2. Configure proper logging levels (e.g., `LOG_LEVEL=warning`)
 3. Use environment-specific `.env` files
 4. Set up proper database credentials
+5. Use Poetry for consistent dependency management
 
-### Docker (Optional)
+### Running in Production
+```bash
+# Set production environment variables in .env:
+# RELOAD=false
+# LOG_LEVEL=warning
+
+# Then run the application
+poetry run python run.py
+
+# Or if not using Poetry
+python run.py
+```
+
+### Docker (Poetry-based)
+```dockerfile
+FROM python:3.9-slim
+
+# Install Poetry
+RUN pip install poetry
+
+# Configure Poetry
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+WORKDIR /app
+
+# Copy Poetry files
+COPY pyproject.toml poetry.lock ./
+
+# Install dependencies
+RUN poetry install --without dev && rm -rf $POETRY_CACHE_DIR
+
+# Copy application code
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["poetry", "run", "python", "run.py"]
+```
+
+### Docker (Traditional pip-based)
 ```dockerfile
 FROM python:3.9-slim
 
 WORKDIR /app
+
+# Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Copy application code
 COPY . .
-CMD ["python", "main.py"]
+
+# Expose port
+EXPOSE 8000
+
+# Run application
+CMD ["python", "run.py"]
 ```
 
 ## 🤝 Contributing
